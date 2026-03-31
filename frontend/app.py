@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-API_URL = "http://localhost:8000"
+API_URL = "https://rag-chatbot-bo3r.onrender.com"
 
 st.set_page_config(
     page_title="RAG Document Chatbot",
