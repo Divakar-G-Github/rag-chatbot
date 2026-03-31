@@ -27,5 +27,3 @@ that answers questions from uploaded PDF documents.
 4. Run backend: `uvicorn main:app --reload --port 8000`
 5. Run frontend: `streamlit run frontend/app.py`
 
-## 📸 Screenshots
-(Add your screenshots here)
