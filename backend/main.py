@@ -31,8 +31,8 @@ def root():
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
     try:
-        os.makedirs("/tmp/data", exist_ok=True)        # ✅ changed
-        file_path = f"/tmp/data/{file.filename}"       # ✅ changed
+        os.makedirs("/tmp/data", exist_ok=True)
+        file_path = f"/tmp/data/{file.filename}"
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         result = process_pdf(file_path)

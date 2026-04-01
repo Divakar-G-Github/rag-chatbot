@@ -5,10 +5,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_chroma import Chroma
+import chromadb
 
 load_dotenv()
 
-load_dotenv()
+# ---- Global in-memory client ----
+chroma_client = chromadb.EphemeralClient()   # ← stays in RAM, no disk needed
+collection_name = "rag_collection"
 
 # ---- STEP 1: Load PDF ----
 def load_pdf(file_path: str):
@@ -27,22 +30,31 @@ def split_documents(documents):
     print(f"Split into {len(chunks)} chunks")
     return chunks
 
-# ---- STEP 3: Create embeddings & store in ChromaDB ----
+# ---- STEP 3: Create embeddings & store in memory ----
 def create_vectorstore(chunks):
     embeddings = FastEmbedEmbeddings()
+
+    # Delete existing collection if exists
+    try:
+        chroma_client.delete_collection(collection_name)
+    except:
+        pass
+
     vectorstore = Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
-        persist_directory="/tmp/vectorstore"    # ✅ changed
+        client=chroma_client,               # ← in-memory client
+        collection_name=collection_name
     )
-    print("Vectorstore created and saved")
+    print("Vectorstore created in memory")
     return vectorstore
 
-# ---- STEP 4: Load existing vectorstore ----
+# ---- STEP 4: Load existing vectorstore from memory ----
 def load_vectorstore():
     embeddings = FastEmbedEmbeddings()
     vectorstore = Chroma(
-        persist_directory="./vectorstore",
+        client=chroma_client,               # ← in-memory client
+        collection_name=collection_name,
         embedding_function=embeddings
     )
     return vectorstore
@@ -57,13 +69,10 @@ def get_answer(question: str):
         temperature=0
     )
 
-    # ✅ Modern replacement for RetrievalQA
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-    
     docs = retriever.invoke(question)
-    
     context = "\n\n".join([doc.page_content for doc in docs])
-    
+
     prompt = f"""Answer the question based only on the context below.
 If you don't know the answer from the context, say "I don't know".
 
@@ -73,9 +82,9 @@ Context:
 Question: {question}
 
 Answer:"""
-    
+
     response = llm.invoke(prompt)
-    
+
     return {
         "answer": response.content,
         "sources": [doc.page_content for doc in docs]
