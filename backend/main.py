@@ -5,6 +5,11 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+if os.path.exists("vectorstore"):
+    shutil.rmtree("vectorstore")
+    os.makedirs("vectorstore")
+    print("✅ Cleared old vectorstore")
+
 app = FastAPI(title="RAG Chatbot API")
 
 app.add_middleware(

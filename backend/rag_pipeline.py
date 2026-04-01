@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_groq import ChatGroq
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_chroma import Chroma
 
 load_dotenv()
@@ -29,22 +29,18 @@ def split_documents(documents):
 
 # ---- STEP 3: Create embeddings & store in ChromaDB ----
 def create_vectorstore(chunks):
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    embeddings = FastEmbedEmbeddings()
     vectorstore = Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
         persist_directory="./vectorstore"
     )
-    print("Vectorstore created and saved")  # ✅ persist() removed
+    print("Vectorstore created and saved")
     return vectorstore
 
 # ---- STEP 4: Load existing vectorstore ----
 def load_vectorstore():
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    embeddings = FastEmbedEmbeddings()
     vectorstore = Chroma(
         persist_directory="./vectorstore",
         embedding_function=embeddings
