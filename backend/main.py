@@ -5,11 +5,6 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-if os.path.exists("vectorstore"):
-    shutil.rmtree("vectorstore")
-    os.makedirs("vectorstore")
-    print("✅ Cleared old vectorstore")
-
 app = FastAPI(title="RAG Chatbot API")
 
 app.add_middleware(
@@ -36,8 +31,8 @@ def root():
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
     try:
-        os.makedirs("data", exist_ok=True)
-        file_path = f"data/{file.filename}"
+        os.makedirs("/tmp/data", exist_ok=True)        # ✅ changed
+        file_path = f"/tmp/data/{file.filename}"       # ✅ changed
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         result = process_pdf(file_path)

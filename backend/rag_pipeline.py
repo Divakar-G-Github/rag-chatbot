@@ -33,7 +33,7 @@ def create_vectorstore(chunks):
     vectorstore = Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
-        persist_directory="./vectorstore"
+        persist_directory="/tmp/vectorstore"    # ✅ changed
     )
     print("Vectorstore created and saved")
     return vectorstore
